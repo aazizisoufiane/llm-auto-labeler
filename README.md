@@ -15,6 +15,7 @@ LLM-Auto-Labeler is an automated text labeling tool that employs multiple Langua
 ### Prerequisites
 
 - Python 3.7+
+- Langchain
 - Pydantic
 - Your preferred LLM libraries
 
@@ -24,3 +25,6 @@ LLM-Auto-Labeler is an automated text labeling tool that employs multiple Langua
 git clone https://github.com/yourusername/llm-auto-labeler.git
 cd llm-auto-labeler
 pip install -r requirements.txt
+python main.py --description_file "descriptions"
+```
+

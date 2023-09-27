@@ -3,19 +3,16 @@ from typing import List
 from langchain.chains import LLMChain
 # ... other imports ...
 from langchain.prompts import PromptTemplate
-from langchain.prompts.chat import (
-    ChatPromptTemplate,
-    HumanMessagePromptTemplate,
-)
+from langchain.prompts.chat import (ChatPromptTemplate, HumanMessagePromptTemplate, )
 
 from schemas import parser_labels, format_instructions
 from utils import extract_binary_values_from_schemas, transform_string_to_schema
 
 
 class LLMChainHandler:
-    def __init__(self, llm_mediator, llms, labels, description, verbose=False):
+    def __init__(self, llm_mediator, llms, labels, verbose=False):
         self.labels = labels
-        self.description = description
+        self.description = None
         self.llms = llms
         self.llm_mediator = llm_mediator
         self.verbose = verbose
@@ -36,13 +33,10 @@ class LLMChainHandler:
 
         # Define the human message prompt template.
         human_message_prompt = HumanMessagePromptTemplate(
-            prompt=PromptTemplate(
-                template=template,
-                input_variables=["description", "labels"],
+            prompt=PromptTemplate(template=template, input_variables=["description", "labels"],
                 format_instructions={"labels": self.labels},
 
-            )
-        )
+            ))
 
         # Create the chat prompt template.
         chat_prompt_template = ChatPromptTemplate.from_messages([human_message_prompt])
@@ -52,12 +46,7 @@ class LLMChainHandler:
             self.llms = [self.llms]
         for llm in self.llms:
             extractions = LLMChain(llm=llm, prompt=chat_prompt_template, verbose=self.verbose)
-            self.llm_label_responses.append(extractions.run(
-                {"description": self.description,
-                 "labels": self.labels
-                 }
-            )
-            )
+            self.llm_label_responses.append(extractions.run({"description": self.description, "labels": self.labels}))
 
     def mediate_label_choices(self):
 
@@ -79,15 +68,11 @@ class LLMChainHandler:
 
         # Define the human message prompt template.
         human_message_prompt = HumanMessagePromptTemplate(
-            prompt=PromptTemplate(
-                template=template,
-                input_variables=["description", "labels", "llm_answers"],
-                format_instructions={"labels": self.labels,
-                                     "llm_answers": self.llm_label_responses},
+            prompt=PromptTemplate(template=template, input_variables=["description", "labels", "llm_answers"],
+                format_instructions={"labels": self.labels, "llm_answers": self.llm_label_responses},
                 partial_variables={"format_instructions": format_instructions},
 
-            )
-        )
+            ))
 
         # Create the chat prompt template.
         chat_prompt_template = ChatPromptTemplate.from_messages([human_message_prompt])
@@ -96,11 +81,7 @@ class LLMChainHandler:
 
         extractions = LLMChain(llm=self.llm_mediator, prompt=chat_prompt_template, verbose=self.verbose)
         self.mediated_labels = extractions.run(
-            {"description": self.description,
-             "labels": self.labels,
-             "llm_answers": self.llm_label_responses
-             }
-        )
+            {"description": self.description, "labels": self.labels, "llm_answers": self.llm_label_responses})
 
     def extract_labels_and_transform_schema(self):
 
@@ -116,7 +97,8 @@ class LLMChainHandler:
 
     # return binary_values
 
-    def run(self):
+    def run(self, description):
+        self.description = description
         self.collect_multiple_llm_labels()
         self.mediate_label_choices()
         self.extract_labels_and_transform_schema()
