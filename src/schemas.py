@@ -1,10 +1,8 @@
+from config import labels
 from typing import Tuple, List
-
-from langchain.output_parsers import PydanticOutputParser
 from pydantic import BaseModel
 from pydantic import create_model
-
-from config import labels
+from langchain.output_parsers import PydanticOutputParser
 
 
 def generate_label_status_schema(field_names: List[str]) -> type:
